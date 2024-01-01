@@ -1,0 +1,9 @@
+npm init
+sudo npm i mongoose
+sudo npm i express typescript ts-node @types/node @types/express
+
+// para probarlo instala nodemon
+sudo npm i nodemon
+
+// luego corre index.ts
+nodemon src/index.ts
