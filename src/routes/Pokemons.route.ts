@@ -1,5 +1,5 @@
 import { Router } from "express";
-import PokemonsModel from "../collections/Abilities.collection";
+import PokemonsModel from "../collections/Pokemons.collection";
 import AbilitiesModel from "../collections/Abilities.collection";
 import { error } from "console";
 
@@ -7,104 +7,77 @@ const router = Router();
 
 // Es un servicio que me trae a todos los pokemons.
 router.get("/", async (req, res) => {
-    const allPokemons = await PokemonsModel.find({}).lean().exec();
-    res.status(200).json(allPokemons);
+    try {
+        const allPokemons = await PokemonsModel.find({}).sort({ id: 1 }).lean().exec();
+        res.status(200).json(allPokemons);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener todos los pokemon', error: error });
+    }
+    
 });
 
 router.get("/:pokedexNumber", async (req, res) => {
-    const { pokedexNumber } = req.params;
-    const pokemon = await PokemonsModel.find({ pokedexNumber }).lean().exec();
+    try {
+        const { pokedexNumber } = req.params;
+        const pokemon = await PokemonsModel.find({ id: pokedexNumber }).lean().exec();
 
-    if (pokemon.length === 0) {
-        res.status(404).json({
-            message: `There are no Pokemons with PokedexID: ${pokedexNumber}`,
-        });
-    } else {
-        res.status(200).json(pokemon[0]);
+        if (pokemon.length === 0) {
+            res.status(404).json({
+                message: `There are no Pokemons with PokedexID: ${pokedexNumber}`,
+            });
+        } else {
+            res.status(200).json(pokemon[0]);
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener el pokemon por id', error: error });
     }
 });
 
 // Es un servicio para crear un pokemon
 router.post("/", async (req, res) => {
-    const { name, primaryAbility, description } = req.body;
-    // Check if the Pokemon with the given name already exists
-    const existingPokemon = await PokemonsModel.findOne({ name }).lean().exec();
-    if (existingPokemon) {
-        return res
-            .status(400)
-            .json({ error: `Pokemon named ${name} already exists.` });
-    }
+    
+    try {
+        let requestedAbilities = req.body.abilities || [];
 
-    // Validate the existence of referenced abilities
-    const primaryExists = await AbilitiesModel.find({
-        id: { $in: primaryAbility },
-    });
-    if (primaryExists.length < 1) {
-        return res
-            .status(400)
-            .json({ error: "Primary ability does not exist." });
-    }
+        const abilitiesCheck = await Promise.all(
+            requestedAbilities.map(async (abilityName: string) => {
+                const ability = await AbilitiesModel.findOne({ name: abilityName });
+                return ability !== null && ability !== undefined;
+            })
+        );
 
-    const abilities = await PokemonsModel.find({ id: req.body.primaryAbility });
-
-    let next_id = await PokemonsModel.find()
-        .select({ id: 1, _id: 0 })
-        .sort({ id: -1 })
-        .limit(1)
-        .exec();
-    next_id = next_id[0].id + 1;
-    console.log("Max ID for Pokemons is now: $d", next_id);
-
-    var secondaryAbility = req.body.secondaryAbility;
-    if (secondaryAbility === undefined) {
-        console.log("No secondary ability provided!");
-        secondaryAbility = -1;
-    } else {
-        console.log("Y - Secondary ability provided!");
-
-        const secondaryExists = await AbilitiesModel.find({
-            id: { $in: secondaryAbility },
-        });
-        if (secondaryExists.length < 1) {
-            return res
-                .status(400)
-                .json({ error: "Secondary ability does not exist." });
+        if (abilitiesCheck.includes(false)) {
+            return res.status(400).json({ message: 'Una o más habilidades proporcionadas no existen.' });
         }
-        secondaryAbility = req.body.secondaryAbility;
-    }
+        
 
-    const person = await PokemonsModel.create({
-        id: next_id,
-        name: req.body.name,
-        description: req.body.description,
-        abilities: {
-            primary: req.body.primaryAbility,
-            secondary: secondaryAbility,
-        },
-    });
-    res.status(201).json(person);
+        const person = await PokemonsModel.create({
+            id: req.body.id,
+            name: req.body.name,
+            description: req.body.description,
+            primaryType: req.body.primaryType,
+            secondaryType: req.body.secondaryType,
+            abilities: req.body.abilities
+        });
+        res.status(201).json(person);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al crear el pokemon', error: error });
+    }
 });
 
 router.put("/:pokedexNumber", async (req, res) => {
-    const { secondaryAbility } = req.body;
-    if (secondaryAbility !== undefined) {
-        PokemonsModel.updateOne(
-            { id: req.params.pokedexNumber },
-            {
-                $set: {
-                    name: req.body.name,
-                    description: req.body.description,
-                    abilities: {
-                        primary: req.body.primaryAbility,
-                        secondary: secondaryAbility,
-                    },
-                },
-            }
-        ).exec().then(() => {
-            res.status(202).json({message: 'Pokemon modified!'})
-        }).catch(error => {
-            res.status(406).json({error})
+
+    let requestedAbilities = req.body.abilities || [];
+
+    const abilitiesCheck = await Promise.all(
+        requestedAbilities.map(async (abilityName: string) => {
+            const ability = await AbilitiesModel.findOne({ name: abilityName });
+            return ability !== null && ability !== undefined;
         })
+    );
+
+    if (abilitiesCheck.includes(false)) {
+        return res.status(400).json({ message: 'Una o más habilidades proporcionadas no existen.' });
     }
 
     await PokemonsModel.updateOne(
@@ -113,9 +86,9 @@ router.put("/:pokedexNumber", async (req, res) => {
             $set: {
                 name: req.body.name,
                 description: req.body.description,
-                abilities: {
-                    primary: req.body.primaryAbility,
-                },
+                primaryType: req.body.primaryType,
+                secondaryType: req.body.secondaryType,
+                abilities: req.body.abilities,
             },
         }
     ).exec().then(() => {
@@ -126,8 +99,12 @@ router.put("/:pokedexNumber", async (req, res) => {
 });
 
 router.delete('/:pokedexNumber', async (req, res) => {
-    await PokemonsModel.deleteOne({ id: req.params.pokedexNumber});
-    res.status(202).json({ message: ''});
+    try {
+        await PokemonsModel.deleteOne({ id: req.params.pokedexNumber});
+        res.status(202).json({ message: 'El pokemon se eliminó con éxito!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al eliminar el pokemon', error: error });
+    }
 })
 
 export default router;

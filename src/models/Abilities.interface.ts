@@ -1,6 +1,6 @@
 
 export interface AbilitiesInterface {
-    id: Number,
+    id: number,
     name: string,
     description: string,
 }

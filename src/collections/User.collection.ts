@@ -3,10 +3,14 @@ import { UserInterface } from "../models/User.interface";
 
 const userSchema = new mongoose.Schema({
     username: {
-        type: String,
+        type: String, 
+        required: true, 
+        unique: true,
+        index: true,
     },
     password: {
         type: String,
+        required: true,
     }
 });
 

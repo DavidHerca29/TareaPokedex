@@ -1,10 +1,9 @@
 
 export interface PokemonsInterface {
-    id: Number,
+    id: number,
     name: string,
     description: string,
-    abilities: [{
-        primary: Number,
-        secondary?: Number,
-    }]
+    primaryType: string,
+    secondaryType?: string,
+    abilities: number[],
 }

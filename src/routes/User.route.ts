@@ -3,46 +3,65 @@ import UserModel from '../collections/User.collection';
 
 const router = Router();
 
-// Es un servicio que me trae a todos los usuarios.
+// Servicio para obtener todos los usuarios
 router.get('/', async (req, res) => {
-    const allPeople = await UserModel.find({}).lean().exec();
-    res.status(200).json(allPeople);
+    try {
+        const allPeople = await UserModel.find({}).lean().exec();
+        res.status(200).json(allPeople);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener todos los usuarios', error: error });
+    }
 });
 
-// Es un servicio web que me trae a UN usuario por su id
+// Servicio para obtener un usuario por su username
 router.get('/:username', async (req, res) => {
-    const { username } = req.params;
-    const peopleWithThatUsername = await UserModel.find({ username }).lean().exec();
+    try {
+        const { username } = req.params;
+        const peopleWithThatUsername = await UserModel.find({ username }).lean().exec();
 
-    if (peopleWithThatUsername.length === 0) {
-        res.status(404).json({ message: `No hay personas con el username ${username}` });
+        if (peopleWithThatUsername.length === 0) {
+            res.status(404).json({ message: `No hay personas con el username ${username}` });
+        } else {
+            res.status(200).json(peopleWithThatUsername[0]);
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener el usuario por username', error: error });
     }
-    else {
-        res.status(200).json(peopleWithThatUsername[0]);
-    }
-
 });
 
-// Es un servicio para crear un usuario
+// Servicio para crear un usuario
 router.post('/', async (req, res) => {
-    const person = await UserModel.create({
-        username: req.body.username,
-        password: req.body.password,
-    });
-    res.status(201).json(person);
+    try {
+        const person = await UserModel.create({
+            username: req.body.username,
+            password: req.body.password,
+        });
+        res.status(201).json(person);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al crear el usuario', error: error });
+    }
 });
 
-// Es un servicio para modificar un usuario
+// Servicio para modificar un usuario
 router.put('/:username', async (req, res) => {
-    await UserModel.updateOne({ username: req.params.username }, { $set: { password: req.body.password } });
-    res.status(202).json({ message: 'El usuario se modificó con éxito!' });
+    try {
+        const { username } = req.params;
+        await UserModel.updateOne({ username: username }, { $set: { password: req.body.password } });
+        res.status(202).json({ message: 'El usuario se modificó con éxito!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al modificar el usuario', error: error });
+    }
 });
 
-// Es un servicio para borrar un usuario
+// Servicio para eliminar un usuario
 router.delete('/:username', async (req, res) => {
-    const { username } = req.params;
-    await UserModel.deleteOne({ username });
-    res.status(202).json({ message: 'El usuario se eliminó con éxito!' });
-})
+    try {
+        const { username } = req.params;
+        await UserModel.deleteOne({ username: username });
+        res.status(202).json({ message: 'El usuario se eliminó con éxito!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al eliminar el usuario', error: error });
+    }
+});
 
 export default router;
