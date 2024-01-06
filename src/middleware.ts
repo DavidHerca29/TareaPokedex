@@ -5,7 +5,7 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-        return res.status(401).json({ message: 'Encabezado de autorización no proporcionado' });
+        return res.status(401).json({ message: 'No Auth Header Provided!' });
     }
 
     const encodedCredentials = authHeader.split(' ')[1];
@@ -19,9 +19,9 @@ export const authenticationMiddleware = async (req: Request, res: Response, next
         if (user) {
             next();  
         } else {
-            return res.status(401).json({ message: 'Usuario no valido' });
+            return res.status(401).json({ message: 'Invalid User provided!' });
         }
     } catch (error) {
-        return res.status(500).json({ message: 'Error al autenticar el usuario', error: error });
+        return res.status(500).json({ message: 'Error when authenticating user!', error: error });
     }
 };

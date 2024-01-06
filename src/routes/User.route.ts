@@ -9,7 +9,7 @@ router.get('/', async (req, res) => {
         const allPeople = await UserModel.find({}).lean().exec();
         res.status(200).json(allPeople);
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener todos los usuarios', error: error });
+        res.status(500).json({ message: 'Error when getting all users', error: error });
     }
 });
 
@@ -20,12 +20,12 @@ router.get('/:username', async (req, res) => {
         const peopleWithThatUsername = await UserModel.find({ username }).lean().exec();
 
         if (peopleWithThatUsername.length === 0) {
-            res.status(404).json({ message: `No hay personas con el username ${username}` });
+            res.status(404).json({ message: `There is no user with the given username: ${username}` });
         } else {
             res.status(200).json(peopleWithThatUsername[0]);
         }
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener el usuario por username', error: error });
+        res.status(500).json({ message: 'Error when getting the username', error: error });
     }
 });
 
@@ -38,7 +38,7 @@ router.post('/', async (req, res) => {
         });
         res.status(201).json(person);
     } catch (error) {
-        res.status(500).json({ message: 'Error al crear el usuario', error: error });
+        res.status(500).json({ message: 'Error when creating the user', error: error });
     }
 });
 
@@ -47,9 +47,9 @@ router.put('/:username', async (req, res) => {
     try {
         const { username } = req.params;
         await UserModel.updateOne({ username: username }, { $set: { password: req.body.password } });
-        res.status(202).json({ message: 'El usuario se modificó con éxito!' });
+        res.status(202).json({ message: 'El modified successfully!' });
     } catch (error) {
-        res.status(500).json({ message: 'Error al modificar el usuario', error: error });
+        res.status(500).json({ message: 'Error when modifying user', error: error });
     }
 });
 
@@ -58,9 +58,9 @@ router.delete('/:username', async (req, res) => {
     try {
         const { username } = req.params;
         await UserModel.deleteOne({ username: username });
-        res.status(202).json({ message: 'El usuario se eliminó con éxito!' });
+        res.status(202).json({ message: 'User was deleted!' });
     } catch (error) {
-        res.status(500).json({ message: 'Error al eliminar el usuario', error: error });
+        res.status(500).json({ message: 'Error when deleting the user!', error: error });
     }
 });
 

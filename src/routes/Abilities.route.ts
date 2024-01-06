@@ -9,7 +9,7 @@ router.get('/', async (req, res) => {
         const allAbilities = await AbilitiesModel.find({}).lean().exec();
         res.status(200).json(allAbilities);
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener todas las habilidades', error: error });
+        res.status(500).json({ message: 'Error when extracting all abilities', error: error });
     }
 });
 
@@ -33,7 +33,7 @@ router.post('/', async (req, res) => {
         });
         res.status(201).json(ability);
     } catch (error) {
-        res.status(500).json({ message: 'Error al crear la habilidad', error: error });
+        res.status(500).json({ message: 'Error when creating ability', error: error });
     }
 });
 

@@ -1,3 +1,5 @@
+// Creado por Kevin Quesada Jiménez - 2020096838 y David Hernandez Calvo - 2020041924
+
 import mongoose from 'mongoose';
 import express, { Request, Response } from 'express';
 
@@ -25,7 +27,7 @@ const main = async () => {
     await mongoose.connect(connectionString);
 
     app.listen(port, () => {
-        console.log(`La aplicación está escuchando en el puerto ${port}`);
+        console.log(`App loaded and listening on port: ${port}`);
     });
 };
 

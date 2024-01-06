@@ -11,7 +11,7 @@ router.get("/", async (req, res) => {
         const allPokemons = await PokemonsModel.find({}).sort({ id: 1 }).lean().exec();
         res.status(200).json(allPokemons);
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener todos los pokemon', error: error });
+        res.status(500).json({ message: 'Error getting all pokemon!', error: error });
     }
     
 });
@@ -24,13 +24,13 @@ router.get("/:pokedexNumber", async (req, res) => {
 
         if (pokemon.length === 0) {
             res.status(404).json({
-                message: `No hay pokemon con esta PokedexID: ${pokedexNumber}`,
+                message: `No pokemon with PokedexID: ${pokedexNumber}`,
             });
         } else {
             res.status(200).json(pokemon[0]);
         }
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener el pokemon por id', error: error });
+        res.status(500).json({ message: 'Error obtaining pokemon by id!', error: error });
     }
 });
 
@@ -48,7 +48,7 @@ router.post("/", async (req, res) => {
         );
 
         if (abilitiesCheck.includes(false)) {
-            return res.status(400).json({ message: 'Una o más habilidades proporcionadas no existen.' });
+            return res.status(400).json({ message: 'One or more abilities do not exist!' });
         }
         
 
@@ -62,7 +62,7 @@ router.post("/", async (req, res) => {
         });
         res.status(201).json(person);
     } catch (error) {
-        res.status(500).json({ message: 'Error al crear el pokemon', error: error });
+        res.status(500).json({ message: 'Error when creating pokemon', error: error });
     }
 });
 
@@ -79,7 +79,7 @@ router.put("/:pokedexNumber", async (req, res) => {
     );
 
     if (abilitiesCheck.includes(false)) {
-        return res.status(400).json({ message: 'Una o más habilidades proporcionadas no existen.' });
+        return res.status(400).json({ message: 'One or more abilities do not exist!' });
     }
 
     await PokemonsModel.updateOne(
@@ -94,7 +94,7 @@ router.put("/:pokedexNumber", async (req, res) => {
             },
         }
     ).exec().then(() => {
-        res.status(202).json({message: 'Pokemon modificado!'});
+        res.status(202).json({message: 'Pokemon updated!'});
     }).catch(error => {
         res.status(406).json({error});
     });
@@ -105,9 +105,9 @@ router.put("/:pokedexNumber", async (req, res) => {
 router.delete('/:pokedexNumber', async (req, res) => {
     try {
         await PokemonsModel.deleteOne({ id: req.params.pokedexNumber});
-        res.status(202).json({ message: 'El pokemon se eliminó con éxito!' });
+        res.status(202).json({ message: 'Pokemon Deleted!' });
     } catch (error) {
-        res.status(500).json({ message: 'Error al eliminar el pokemon', error: error });
+        res.status(500).json({ message: 'Error when deleting pokemon', error: error });
     }
 })
 
