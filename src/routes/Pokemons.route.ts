@@ -5,7 +5,7 @@ import { error } from "console";
 
 const router = Router();
 
-// Es un servicio que me trae a todos los pokemons.
+// Servicio para obtener todos los pokemons.
 router.get("/", async (req, res) => {
     try {
         const allPokemons = await PokemonsModel.find({}).sort({ id: 1 }).lean().exec();
@@ -16,6 +16,7 @@ router.get("/", async (req, res) => {
     
 });
 
+// Servicio para obtener un pokemon por id
 router.get("/:pokedexNumber", async (req, res) => {
     try {
         const { pokedexNumber } = req.params;
@@ -23,7 +24,7 @@ router.get("/:pokedexNumber", async (req, res) => {
 
         if (pokemon.length === 0) {
             res.status(404).json({
-                message: `There are no Pokemons with PokedexID: ${pokedexNumber}`,
+                message: `No hay pokemon con esta PokedexID: ${pokedexNumber}`,
             });
         } else {
             res.status(200).json(pokemon[0]);
@@ -33,7 +34,7 @@ router.get("/:pokedexNumber", async (req, res) => {
     }
 });
 
-// Es un servicio para crear un pokemon
+// Servicio para crear un pokemon
 router.post("/", async (req, res) => {
     
     try {
@@ -65,6 +66,7 @@ router.post("/", async (req, res) => {
     }
 });
 
+// Servicio para modificar un pokemon
 router.put("/:pokedexNumber", async (req, res) => {
 
     let requestedAbilities = req.body.abilities || [];
@@ -92,12 +94,14 @@ router.put("/:pokedexNumber", async (req, res) => {
             },
         }
     ).exec().then(() => {
-        res.status(202).json({message: 'Pokemon modified!'});
+        res.status(202).json({message: 'Pokemon modificado!'});
     }).catch(error => {
         res.status(406).json({error});
     });
 });
 
+
+// Servicio para eliminar un pokemon
 router.delete('/:pokedexNumber', async (req, res) => {
     try {
         await PokemonsModel.deleteOne({ id: req.params.pokedexNumber});

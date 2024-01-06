@@ -6,24 +6,18 @@ import AbilitiesRouter from './routes/Abilities.route';
 import UserRouter from './routes/User.route';
 import PokemonsRouter from './routes/Pokemons.route'
 
+import { authenticationMiddleware } from './middleware';
+
 
 const app = express();
 const port = 3000;
 
-app.use(express.json()); // <- Esta linea permite que se accese el body
+app.use(express.json());
 
 app.use('/users', UserRouter);
-app.use('/abilities', AbilitiesRouter);
-app.use('/pokemon', PokemonsRouter);
+app.use('/abilities',authenticationMiddleware, AbilitiesRouter);
+app.use('/pokemon', authenticationMiddleware, PokemonsRouter);
 
-// const authenticationMiddleware = (req: Request, result: Response, next: () => any) => {
-//     if (req.headers.authorization === 'Basic andres:obando') {
-//         next();
-//     }
-//     else {
-//         return result.status(401).json({ message: 'El usuario no esta autorizado' });
-//     }
-// }
 
 const connectionString: string = 'mongodb+srv://dahercal29:KwCNLLaG75x9PEV7@pokecluster.wof8j1x.mongodb.net/Pokedex';
 
